@@ -1,4 +1,4 @@
-#!name = 淘宝去广告 增强版 v7
+#!name = 淘宝去广告 增强版 v8
 #!desc = fork 自 kelee 2026-10-02 版，多轮冷启动 HAR 实证迭代。拦截开屏广告、首页弹窗/浮层/运营 banner 与埋点；修复原版 poplayer 弹层配置正则失配（340KB 弹层配置曾全量下发）；断 amdc HTTPDNS 防 IP 直连绕过 MITM；拦 mmstat/tanx 埋点广告域族。保留 kelee 11 条 mtop 拦截与 guide-acs 开屏脚本（依赖 kelee.one JS，不可达时仅开屏过滤失效）。更新插件后请核对 name 中的版本号。
 #!author = RuCu6/可莉（原版规则） / 个人增强 fork
 #!icon = https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/Taobao.png
@@ -22,6 +22,7 @@ DOMAIN-SUFFIX, mmstat.com, REJECT
 DOMAIN, mdap.alipay.com, REJECT
 DOMAIN, app-monitor.ele.me, REJECT
 DOMAIN, alsc-fingerprint.ele.me, REJECT
+DOMAIN-SUFFIX, cloudvideocdn.taobao.com, REJECT
 AND, ((DOMAIN-SUFFIX, m.taobao.com), (PROTOCOL, QUIC)), REJECT
 URL-REGEX, ^http:\/\/[\d.]+(:80)?\/amdc\/mobileDispatch, REJECT
 DOMAIN, amdc.m.taobao.com, REJECT
