@@ -1,5 +1,5 @@
-#!name = 淘宝去广告（增强版）
-#!desc = 过滤开屏广告、首页弹窗/浮窗、运营 banner 与埋点。fork 自 kelee 2026-10-02 版，基于两轮冷启动 HAR 实证迭代。v1（2026-10-08 16:06 HAR）：修复 poplayer 失配——原版正则 \w+\.json 匹配不了 /popcdn/2/config.json 多段路径，340KB 弹层总配置（sc=117 场景/ac=762 模板：首页弹窗/浮窗/顶部 banner/桌面引导等）一直全量下发，本版全域 reject_dict 替代；新增 tb.ele.me 吃饭券预取拦截与 4 埋点域名（ynuf/tiga/loggw-ex/dualstack-logs.amap.com）。v2（2026-10-08 16:22 HAR 复查）：新增 DOMAIN-SUFFIX tanx.com（阿里妈妈 TanX 广告展示服务 ifs.tanx.com/display_ifs 实测漏网，pid 广告位加密参数，纯广告域）；新增 DOMAIN-SUFFIX logs.amap.com（高德 SDK 日志域名 fallback：拦 dualstack-logs 后主域名 logs.amap.com 继续上传 89B）；新增 gw.alipayobjects.com/config/loggw/ 路径级拦截（支付宝 SDK 日志配置，不影响同域 QUICKPAY 支付资源）；hostname 补 gw.alicdn.com（kelee 开屏素材图拦截规则的目标域名不在其 hostname，疑同 poplayer 为僵尸规则，补齐使其有机会生效）。保留 kelee：11 条 mtop 拦截、guide-acs 开屏脚本（依赖 kelee.one JS，不可达时仅开屏过滤失效无副作用）。拦截生效形态备注：域名 REJECT 走主配置 domain-reject-mode=DNS，在 HAR/日志里表现为 404 空响应+断连重试，非请求消失。注意：[Rewrite]/[Script] 段内行尾不能带分号、不能有 # 注释。上游更新时 diff 本插件与 kelee 原版（本地存档 kelee_originals/Taobao_remove_ads.lpx）。
+#!name = 淘宝去广告 增强版 v6
+#!desc = fork 自 kelee 2026-10-02 版，多轮冷启动 HAR 实证迭代。拦截开屏广告、首页弹窗/浮层/运营 banner 与埋点；修复原版 poplayer 弹层配置正则失配（340KB 弹层配置曾全量下发）；断 amdc HTTPDNS 防 IP 直连绕过 MITM；拦 mmstat/tanx 埋点广告域族。保留 kelee 11 条 mtop 拦截与 guide-acs 开屏脚本（依赖 kelee.one JS，不可达时仅开屏过滤失效）。更新插件后请核对 name 中的版本号。
 #!author = RuCu6/可莉（原版规则） / 个人增强 fork
 #!icon = https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/Taobao.png
 #!date = 2026-10-08
