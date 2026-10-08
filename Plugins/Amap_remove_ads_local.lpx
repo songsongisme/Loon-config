@@ -1,0 +1,54 @@
+#!name = 高德去广告（本地增强版）v1
+#!desc = fork 自 kelee 2026-10-02 版完整规则（3 Rule + 15 Rewrite + 14 Script），脚本 fork 自 RuCu6 2026-03-09 amap.js（kelee_originals 存档）并自托管于本仓库 Scripts/Amap_remove_ads_local.js，摆脱 kelee.one 依赖。对照 ddgksf2013 AmapAds V1.0.28 去重后增补：aos/alimama/splash_screen 开屏请求变体、asa/ads_attribution 广告归因、msgbox/pull 变体、uploadimg GIF 运营素材、amdc 调度响应改写静默回落（共享 Scripts/amdc_fallback.js，UA 白名单含 AMap）；另按抓包实测拦 awaken.amap.com 小组件唤醒埋点。上游更新时 diff 本插件与 kelee_originals/Amap_remove_ads.lpx 及 Amap_remove_ads.js。注意：[Rewrite]/[Script] 段行尾无分号、无 # 注释。
+#!author = RuCu6/kelv1n1n/可莉（原版规则与脚本） / 个人增强 fork（增补思路参考 ddgksf2013）
+#!icon = https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/Amap.png
+#!date = 2026-10-08
+#!loon_version = 3.5.1(998)
+
+[Rule]
+DOMAIN, amap-aos-info-nogw.amap.com, REJECT
+DOMAIN, free-aos-cdn-image.amap.com, REJECT
+DOMAIN-SUFFIX, v.smtcdns.com, REJECT
+DOMAIN, awaken.amap.com, REJECT
+
+[Rewrite]
+request if ${url} ~= /^https:\/\/m5\.amap\.com\/ws\/shield\/search\/new_hotword\?/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/m5\.amap\.com\/ws\/faas\/amap-navigation\/card-service-(?:car-end|route-plan)/i then reject_dict(200)
+response if ${url} ~= /^https:\/\/m5\.amap\.com\/ws\/shield\/search_business\/process\/marketingOperationStructured\?/i then response.json.delete(["data.commonMaterial", "data.tipsOperationLocation", "data.resourcePlacement"])
+response if ${url} ~= /^https:\/\/m5\.amap\.com\/ws\/shield\/search_poi\/homepage\?/i then response.json.delete("history_tags")
+request if ${url} ~= /^https:\/\/m5\.amap\.com\/ws\/shield\/search_poi\/tips_adv\?/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/oss\.amap\.com\/ws\/banner\/lists\/\?/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/ai\.amap\.com\/v1\/ai_rec\//i then reject_dict(200)
+request if ${url} ~= /^https:\/\/m5\.amap\.com\/ws\/aos\/main\/page\/product\/list\?/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/m5\.amap\.com\/ws\/faas\/amap-navigation\/(?:main-page-assets|main-page-location|ridewalk-end-fc|usr-profile-fc\/homeV2)/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/m5\.amap\.com\/ws\/(?:mapapi\/hint_text\/offline_data|message\/notice\/list|shield\/search\/new_hotword)/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/m5\.amap\.com\/ws\/shield\/scene\/recommend\?/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/m5\.amap\.com\/ws\/valueadded\/weather\/v2\?/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/sns\.amap\.com\/ws\/msgbox\/pull_mp\?/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/m5-zb\.amap\.com\/ws\/boss\/(?:order\/car\/(?:feedback\/get_card_questions|feedback\/viptips|king_toolbox_car_bubble|remark\/satisfactionConf|rights_information)|tips\/onscene_visual_optimization)/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/m5-zb\.amap\.com\/ws\/boss\/(?:pay\/web\/paySuccess\/info\/request|transportation\/diversion\/resource\/driving)/i then reject_dict(200)
+response if ${url} ~= /^https:\/\/m5-zb\.amap\.com\/ws\/sharedtrip\/taxi\/order_detail_car_tips\?/i then response.json.delete("data.carTips.data.popupInfo")
+request if ${url} ~= /^https:\/\/[\w-]+\.amap\.com\/ws\/aos\/alimama\/splash_screen/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/[\w-]+\.amap\.com\/ws\/asa\/ads_attribution/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/[\w-]+\.amap\.com\/ws\/msgbox\/pull\?/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/[\w-]+\.amap\.com\/uploadimg\/\w+\.gif/i then reject_img(200)
+
+[Script]
+response if ${url} ~= /^https:\/\/m5\.amap\.com\/ws\/aos\/perception\/publicTravel\/beforeNavi\?/i then script("https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads_local.js") with tag="移除路线规划推广", requires_body=true
+response if ${url} ~= /^https:\/\/m5\.amap\.com\/ws\/bus\/plan\/integrate\?/i then script("https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads_local.js") with tag="移除路线规划、导航结束页推广", requires_body=true
+response if ${url} ~= /^https:\/\/m5\.amap\.com\/ws\/c3frontend\/(?:af-(?:hotel|launch)\/page\/main|af-nearby\/nearby)/i then script("https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads_local.js") with tag="移除导航详情页底部酒店、处理附近页", requires_body=true
+response if ${url} ~= /^https:\/\/m5\.amap\.com\/ws\/perception\/drive\/(?:routeInfo|routePlan)/i then script("https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads_local.js") with tag="移除路线规划推广", requires_body=true
+response if ${url} ~= /^https:\/\/m5\.amap\.com\/ws\/shield\/search_bff\/hotword\?/i then script("https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads_local.js") with tag="移除搜索栏推广", requires_body=true
+response if ${url} ~= /^https:\/\/m5\.amap\.com\/ws\/shield\/search_poi\/(?:mps|search\/sp|sug|tips_operation_location)/i then script("https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads_local.js") with tag="移除搜索详情页推广", requires_body=true
+response if ${url} ~= /^https:\/\/m5\.amap\.com\/ws\/faas\/amap-navigation\/(?:card-service-plan-home|main-page)/i then script("https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads_local.js") with tag="移除首页推广", requires_body=true
+response if ${url} ~= /^https:\/\/m5\.amap\.com\/ws\/shield\/frogserver\/aocs\/updatable\/1\?/i then script("https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads_local.js") with tag="移除首页推广", requires_body=true
+response if ${url} ~= /^https:\/\/m5\.amap\.com\/ws\/shield\/dsp\/profile\/index\/nodefaasv3\?/i then script("https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads_local.js") with tag="移除我的页面推广", requires_body=true
+response if ${url} ~= /^https:\/\/m5\.amap\.com\/ws\/shield\/search\/nearbyrec_smart\?/i then script("https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads_local.js") with tag="移除附近页推广", requires_body=true
+response if ${url} ~= /^https:\/\/m5\.amap\.com\/ws\/valueadded\/alimama\/splash_screen\?/i then script("https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads_local.js") with tag="移除开屏广告", requires_body=true
+response if ${url} ~= /^https:\/\/m5-zb\.amap\.com\/ws\/boss\/(?:car\/order\/content_info|order_web\/friendly_information)/i then script("https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads_local.js") with tag="移除打车页推广卡片、弹窗", requires_body=true
+response if ${url} ~= /^https:\/\/m5-zb\.amap\.com\/ws\/promotion-web\/resource(\/home)?\?/i then script("https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads_local.js") with tag="移除打车页红点角标、天气图标", requires_body=true
+response if ${url} ~= /^https:\/\/(?:info|m5)\.amap\.com\/ws\/shield\/search\/(?:common\/coupon\/info|poi\/detail)/i then script("https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads_local.js") with tag="移除导航详情页推广", requires_body=true
+response if ${url} ~= /^http:\/\/[^\/]+(:\d+)?\/amdc\/mobileDispatch/ then script("https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/amdc_fallback.js") with tag="高德amdc静默回落", requires_body=true
+
+[MitM]
+hostname = *.amap.com
