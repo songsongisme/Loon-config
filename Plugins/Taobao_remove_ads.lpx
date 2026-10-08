@@ -18,6 +18,7 @@ DOMAIN, loggw-ex.alipay.com, REJECT
 DOMAIN, dualstack-logs.amap.com, REJECT
 DOMAIN-SUFFIX, logs.amap.com, REJECT
 DOMAIN-SUFFIX, tanx.com, REJECT
+DOMAIN-SUFFIX, mmstat.com, REJECT
 AND, ((DOMAIN-SUFFIX, m.taobao.com), (PROTOCOL, QUIC)), REJECT
 URL-REGEX, ^http:\/\/[\d.]+(:80)?\/amdc\/mobileDispatch, REJECT
 DOMAIN, amdc.m.taobao.com, REJECT
