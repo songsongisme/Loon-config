@@ -1,4 +1,4 @@
-#!name = 闲鱼去广告（本地增强版）v1
+#!name = 闲鱼去广告 增强版 v1
 #!desc = fork 自 kelee 2026-10-02 版完整 23 条复写，对照 ddgksf2013 GoofishAds V1.0.11 逐条去重后增补 3 处：mtop.idle.ad.expose 开屏通用广告拦截（kelee 仅拦 idlecommerce.splash.ads 变体）、iyes.youku.com 内嵌优酷广告域 REJECT、amdc 调度响应改写静默回落系统 DNS（共享本仓库 Scripts/amdc_fallback.js，UA 白名单防误伤）。上游更新时 diff 本插件与 kelee_originals/FleaMarket_remove_ads.lpx。注意：[Rewrite]/[Script] 段行尾无分号、无 # 注释，否则整段不识别。
 #!author = 可莉/RuCu6（原版规则） / 个人增强 fork（增补思路参考 ddgksf2013）
 #!icon = https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/FleaMarket.png

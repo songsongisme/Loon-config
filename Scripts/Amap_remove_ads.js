@@ -1,7 +1,7 @@
 /*
 原版：RuCu6 https://raw.githubusercontent.com/RuCu6/Loon/refs/heads/main/Scripts/amap.js
 本地 fork：songsongisme/Loon-config（自托管，摆脱 kelee.one 依赖），功能与原版一致
-配套插件：Plugins/Amap_remove_ads_local.lpx
+配套插件：Plugins/Amap_remove_ads.lpx
 */
 // 2026-03-09 08:15
 

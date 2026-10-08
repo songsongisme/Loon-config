@@ -7,7 +7,7 @@
 > 触发：插件 [Script] 段 amdc 规则（plain http 请求，无需加入 MITM hostname）
 > 白名单：按请求 User-Agent 识别阿里系 App，未命中的一律放行不动，
         避免误伤未适配 App 的 amdc 调度
-> 引用：Taobao_remove_ads.lpx v9+ / FleaMarket_remove_ads_local.lpx v1+
+> 引用：Taobao_remove_ads.lpx v9+ / FleaMarket_remove_ads.lpx v1+
 ***********************************************/
 
 var ua = $request.headers["User-Agent"] || $request.headers["user-agent"] || "";

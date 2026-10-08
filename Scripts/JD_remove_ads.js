@@ -1,5 +1,5 @@
 /*
-京东去广告脚本（本地增强版）
+京东去广告脚本（增强版）
 fork 自 kelee JD_remove_ads.js（2026-10-02 版，上游源自 RuCu6/QuanX jingdong.js）
 本地增补 2026-10-08：welcomeHome 移除全部 type=hybrid 运营楼层——
   实测 7 个 hybrid 楼层全为推广物料：国家补贴(12423)、品质生活(12538)、9.9包邮(13034)、

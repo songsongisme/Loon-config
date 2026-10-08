@@ -1,0 +1,33 @@
+#!name = 京东去广告 增强版 v2
+#!desc = 移除京东开屏广告，精简首页/我的页面产品推广与埋点上报。kelee 原版（2026-10-02）完整 fork，本地增补：welcomeHome 移除全部 type=hybrid 运营楼层（实测 7 个全为推广物料，整类过滤抗大促轮换）；v2 新增埋点/性能域族 REJECT（mars 实测单次冷启动 15s 50+ 条，另有 mllog/uranus/cltm/ex/anti-sdk-report/perf/policy/cactus/h5speed）、/da/ 广告素材路径、queryPagePopWindow/babelGetGuideTips 首页 H5 弹窗与引导接口拦截（ProxyPin 实测响应 activityId 与首页内嵌 Babel 活动页一致）。上游更新时 diff 本插件与 kelee_originals/JD_remove_ads.lpx。脚本以 GitHub raw 分发（本仓库 Scripts/JD_remove_ads.js）。uniformRecommend9 为首页推荐主 feed，有意不拦截（kelee 的 uniformRecommend[06] 规则勿扩大到 9）。注意：[Rewrite]/[Script] 段内行尾不能带分号、不能有 # 注释，否则整段不识别。
+#!author = RuCu6/Maasea（原版规则） / 本地 fork 增补
+#!icon = https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/JD.png
+#!date = 2026-10-08
+#!loon_version = 3.5.1(998)
+
+[Rule]
+URL-REGEX, "^http:\/\/\w{32}\.jddebug\.com\/diagnose\?", REJECT
+URL-REGEX, "^https?:\/\/img\d+\.360buyimg\.com\/da\/", REJECT
+DOMAIN-SUFFIX, mars.jd.com, REJECT
+DOMAIN, mllog.jd.com, REJECT
+DOMAIN, uranus.jd.com, REJECT
+DOMAIN, cltm.jd.com, REJECT
+DOMAIN, ex.m.jd.com, REJECT
+DOMAIN, anti-sdk-report.m.jd.com, REJECT
+DOMAIN, perf.m.jd.com, REJECT
+DOMAIN, policy.jd.com, REJECT
+DOMAIN, cactus.jd.com, REJECT
+DOMAIN, h5speed.m.jd.com, REJECT
+
+[Rewrite]
+request if ${url} ~= /^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=(searchBoxWord|stationPullService|uniformRecommend[06])/i then reject_dict(200)
+
+request if ${url} ~= /^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=(queryPagePopWindow|babelGetGuideTips)/i then reject_dict(200)
+
+response if ${url} ~= /^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=basicConfig/i then response.json.replace(["data.JDMessage.socketmonitor.isSocketEstablishedAhead", "data.JDMessage.socketmonitor.isSocketReport", "data.JDHttpToolKit.httpdns.httpdns"], [0, 0, 0])
+
+[Script]
+response if ${url} ~= /^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=(deliverLayer|getTabHomeInfo|myOrderInfo|orderTrackBusiness|personinfoBusiness|start|welcomeHome)/i then script("https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/JD_remove_ads.js") with tag="移除京东广告", requires_body=true
+
+[MitM]
+hostname=api.m.jd.com
