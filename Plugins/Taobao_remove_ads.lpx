@@ -1,5 +1,5 @@
 #!name = 淘宝去广告（增强版）
-#!desc = 过滤开屏广告、首页弹窗/浮窗、运营 banner 与埋点。fork 自 kelee 2026-10-02 版，基于 2026-10-08 冷启动 HAR（25 请求）实证增强。修复 poplayer 失配：原版脚本规则正则 \w+\.json 匹配不了实际路径 /popcdn/2/config.json（含斜杠多段路径），从未生效——HAR 实测 340KB 弹层总配置全量下发（sc=117 场景→模板映射，ac=762 模板定义：首页弹窗 Page_Home@popup 系列/首页浮窗 float_window/顶部悬浮 banner tb_top_float_banner/桌面图标引导 tbDesktopLinkGuide/店铺关注营销等）；本版对 poplayer.template.alibaba.com 全域 reject_dict(200)，弹层配置不再下发，比原版脚本过滤更彻底，且不依赖外部 JS。新增：tb.ele.me 吃饭券中心预取拦截；埋点域名 REJECT×4（cdn.ynuf.aliapp.org UT 设备指纹、tiga-release-dc.m.taobao.com 埋点采样配置、loggw-ex.alipay.com 支付宝 SDK 日志上传、dualstack-logs.amap.com 高德 SDK 日志上传）。保留 kelee：11 条 mtop 广告接口 request 拦截、开屏素材图拦截、guide-acs 开屏脚本复写（依赖 kelee.one 的 Taobao_remove_ads.js，设备端可达；不可达时仅开屏视频/模板过滤失效，其余规则不受影响）。功能性请求（getTimestamp/zconfig 离线包/QUICKPAY）未拦截。注意：[Rewrite]/[Script] 段内行尾不能带分号、不能有 # 注释，否则整段复写不识别。上游更新时 diff 本插件与 kelee 原版（本地存档 kelee_originals/Taobao_remove_ads.lpx）。
+#!desc = 过滤开屏广告、首页弹窗/浮窗、运营 banner 与埋点。fork 自 kelee 2026-10-02 版，基于两轮冷启动 HAR 实证迭代。v1（2026-10-08 16:06 HAR）：修复 poplayer 失配——原版正则 \w+\.json 匹配不了 /popcdn/2/config.json 多段路径，340KB 弹层总配置（sc=117 场景/ac=762 模板：首页弹窗/浮窗/顶部 banner/桌面引导等）一直全量下发，本版全域 reject_dict 替代；新增 tb.ele.me 吃饭券预取拦截与 4 埋点域名（ynuf/tiga/loggw-ex/dualstack-logs.amap.com）。v2（2026-10-08 16:22 HAR 复查）：新增 DOMAIN-SUFFIX tanx.com（阿里妈妈 TanX 广告展示服务 ifs.tanx.com/display_ifs 实测漏网，pid 广告位加密参数，纯广告域）；新增 DOMAIN-SUFFIX logs.amap.com（高德 SDK 日志域名 fallback：拦 dualstack-logs 后主域名 logs.amap.com 继续上传 89B）；新增 gw.alipayobjects.com/config/loggw/ 路径级拦截（支付宝 SDK 日志配置，不影响同域 QUICKPAY 支付资源）；hostname 补 gw.alicdn.com（kelee 开屏素材图拦截规则的目标域名不在其 hostname，疑同 poplayer 为僵尸规则，补齐使其有机会生效）。保留 kelee：11 条 mtop 拦截、guide-acs 开屏脚本（依赖 kelee.one JS，不可达时仅开屏过滤失效无副作用）。拦截生效形态备注：域名 REJECT 走主配置 domain-reject-mode=DNS，在 HAR/日志里表现为 404 空响应+断连重试，非请求消失。注意：[Rewrite]/[Script] 段内行尾不能带分号、不能有 # 注释。上游更新时 diff 本插件与 kelee 原版（本地存档 kelee_originals/Taobao_remove_ads.lpx）。
 #!author = RuCu6/可莉（原版规则） / 个人增强 fork
 #!icon = https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/Taobao.png
 #!date = 2026-10-08
@@ -16,6 +16,8 @@ DOMAIN, cdn.ynuf.aliapp.org, REJECT
 DOMAIN, tiga-release-dc.m.taobao.com, REJECT
 DOMAIN, loggw-ex.alipay.com, REJECT
 DOMAIN, dualstack-logs.amap.com, REJECT
+DOMAIN-SUFFIX, logs.amap.com, REJECT
+DOMAIN-SUFFIX, tanx.com, REJECT
 
 [Rewrite]
 request if ${url} ~= /^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.fliggy\.crm\.screen\.(allresource|predict)/i then reject_dict(200)
@@ -30,10 +32,11 @@ request if ${url} ~= /^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.trip\.activity\.
 request if ${url} ~= /^https:\/\/(?:gw|heic)\.alicdn\.com\/imgextra\/i\d\/\d*\/?[\w!]+-\d-(?:octopus|tps)-(?:1080|1125)-\d{4}\.(?:jpg|png)_(?:1\d{3}|9\d{2})x(?:\d|1\d{3}|9\d{2})q[59]0/i then reject_dict(200)
 request if ${url} ~= /^https:\/\/guide-acs\.m\.taobao\.com\/gw\/mtop\.taobao\.(volvo\.secondfloor\.getconfig|wireless\.home\.newface\.awesome\.get)/i then reject_dict(200)
 request if ${url} ~= /^https:\/\/poplayer\.template\.alibaba\.com\//i then reject_dict(200)
-request if ${url} ~= /^https:\/\/tb\.ele\.me\/app\/conch-page\/eat-coupon-center\//i then reject_dict(200)
+request if ${url} ~= /^https://tb\.ele\.me\/app\/conch-page\/eat-coupon-center\//i then reject_dict(200)
+request if ${url} ~= /^https:\/\/gw\.alipayobjects\.com\/config\/loggw\//i then reject_dict(200)
 
 [Script]
 response if ${url} ~= /^https:\/\/guide-acs\.m\.taobao\.com\/gw\/mtop\.taobao\.(cloudvideo\.video\.query|wireless\.home\.splash\.awesome\.get)/i then script("https://kelee.one/Resource/JavaScript/Taobao/Taobao_remove_ads.js") with tag="移除淘宝开屏广告", requires_body=true
 
 [MitM]
-hostname = acs.m.taobao.com, heic.alicdn.com, guide-acs.m.taobao.com, poplayer.template.alibaba.com, tb.ele.me
+hostname = acs.m.taobao.com, heic.alicdn.com, gw.alicdn.com, guide-acs.m.taobao.com, poplayer.template.alibaba.com, tb.ele.me, gw.alipayobjects.com
