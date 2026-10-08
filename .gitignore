@@ -1,0 +1,7 @@
+# 敏感文件与抓包产物严禁入库
+*.lcf
+*.har
+photo_*
+proxy_tmp/
+kelee_originals/
+*token*

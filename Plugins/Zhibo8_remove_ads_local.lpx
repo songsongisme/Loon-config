@@ -1,0 +1,29 @@
+#!name = 直播吧去广告（本地维护版）
+#!desc = 移除信息流广告、横幅广告、弹窗广告、皮肤配置、悬浮挂件、热门搜索，移除青少年模式，精简我的页面。kelee 原版（2026-10-02）克隆，本地增补 4 条：拦截 tongji 统计埋点、impress 广告曝光回传、activities 广告素材与活动位配置；本地改动 1 条：推荐流不再保留视频资讯（原版白名单含 video）。注意：[Rewrite] 段内行尾不能带分号、不能有 # 注释，否则整段复写不识别。
+#!author = @可莉（原版规则） / 本地克隆增补
+#!icon = https://raw.githubusercontent.com/Orz-3/mini/master/Color/Global.png
+#!date = 2026-10-07
+#!loon_version = 3.5.1(998)
+
+[Rewrite]
+response if ${url} ~= /^https:\/\/headline\.qiumibao\.com\/recommend\/list\?/i then response.json.jq(".news|=map(select(.model==\"news\"))")
+response if ${url} ~= /^https:\/\/a\.qiumibao\.com\/found\/\?/i then response.json.jq("map(select(.is_game != true))")
+response if ${url} ~= /^https:\/\/a\.qiumibao\.com\/ios\/config\/\?/i then response.json.delete(["skin", "advert", "advert_config", "mall", "httpdns", "reward", "pgame", "corner_mark", "liveshop", "theme", "pop", "live_activity_push"])
+response if ${url} ~= /^https:\/\/a\.qiumibao\.com\/ios\/config\/\?/i then response.json.jq(".all_sections.match_sections.labels |= (if . then (.blacks_disable |= if . then map(select(. != \"游戏\")) else . end) | (.show |= if . then map(select(. != \"游戏\")) else . end) else . end)")
+request if ${url} ~= /^https:\/\/rn\.qiumibao\.com\/news\/relation\.php$/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/guess\.qiumibao\.com\/api\/c\/notice$/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/guess\.qiumibao\.com\/api\/c\/pop$/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/guess\.qiumibao\.com\/api\/ep\/pop$/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/guess\.qiumibao\.com\/api\/c\/banner$/i then reject_dict(200)
+response if ${url} ~= /^https:\/\/guess\.qiumibao\.com\/api\/n\/rcd$/i then response.json.delete("data.banner")
+response if ${url} ~= /^https:\/\/pre-match\.qiumibao\.com\/pre_match_data\/v\d\/\d+-\d+-\d+\/\d+_fund\.htm\?/i then response.json.jq("del(.data[] | select(.type == \"guide\"))")
+response if ${url} ~= /^https:\/\/guess\.qiumibao\.com\/api\/c\/menu$/i then response.json.delete("data.banner")
+response if ${url} ~= /^https:\/\/s\.qiumibao\.com\/m\/ios\/json\/zhibo\/zuqiu\/\d+\/match\d+vl\.htm\?/i then response.json.delete(["ep_v2", "ep_live"])
+request if ${url} ~= /^https:\/\/search\.qiumibao\.com\/hot\/word_list$/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/tongji\.qiumibao\.com\//i then reject_dict(200)
+request if ${url} ~= /^https:\/\/impress\.qiumibao\.com\//i then reject_dict(200)
+request if ${url} ~= /^https:\/\/s\.qiumibao\.com\/activities\/material\/json\.htm\?/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/a\.qiumibao\.com\/activities\/config\.php/i then reject_dict(200)
+
+[Mitm]
+hostname = headline.qiumibao.com, a.qiumibao.com, rn.qiumibao.com, guess.qiumibao.com, s.qiumibao.com, pre-match.qiumibao.com, search.qiumibao.com
