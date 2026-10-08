@@ -5,3 +5,5 @@ photo_*
 proxy_tmp/
 kelee_originals/
 *token*
+
+!main.lcf

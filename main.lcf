@@ -1,0 +1,135 @@
+# Loon 自动配置 - 纯时延自动优选，无手动策略组，全程无需人工干预。
+# Date: 2025-11-08 00:21:37
+# Author: https://t.me/iKeLee
+# 更多插件可前往 https://hub.kelee.one 安装
+# ----------------------------------------------------------------
+# 2026-10-05 三次更新（更换订阅：linuxlh/xiaoyan 中转线路，纯时延、无手动组）：
+# 1. 订阅已更换为全 TCP 节点（VMess/ws，共 27 个真实节点：日本/新加坡/香港/香港WAP/台湾/印度/美国LA/加拿大/德国/英国），
+#    入口疑似国内中转服务器，适配家宽禁用跨境 UDP 的环境。
+# 2. 面板 TLS 证书无效，订阅行必须保留 skip-cert-verify=true，否则订阅拉取失败。
+# 3. 全球节点过滤器新增排除关键词 过滤，用于剔除占位节点（过滤掉15条线路）。
+# 4. 仅保留一个"全球时延优选"url-test 组：每 300 秒（5 分钟）对全部真实节点测速（容差 50ms），
+#    谁延迟最低走谁；当前节点失效时自动切换到下一个最低时延节点。
+# 5. 移除全部手动策略组与地区分组，所有规则/插件统一指向 全球时延优选。
+
+[General]
+# IPv6：2026-10-06 应对国内 v6-only 域名（如 v6.zhuanzhuan.com）开启，
+# 否则无 A 记录的域名 GEOIP,CN 永远无 IP 可查、必落 FINAL
+ip-mode = dual
+ipv6-vif = off
+dns-server = 223.5.5.5,119.29.29.29
+sni-sniffing = true
+disable-stun = true
+dns-reject-mode = LoopbackIP
+domain-reject-mode = DNS
+udp-fallback-mode = REJECT
+wifi-access-http-port = 7222
+wifi-access-socks5-port = 7221
+allow-wifi-access = false
+interface-mode = auto
+test-timeout = 5
+disconnect-on-policy-change = false
+internet-test-url = http://connectivitycheck.platform.hicloud.com/generate_204
+proxy-test-url = http://www.gstatic.com/generate_204
+resource-parser = https://raw.githubusercontent.com/sub-store-org/Sub-Store/release/sub-store-parser.loon.min.js
+geoip-url = https://testingcf.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country.mmdb
+ipasn-url = https://geodata.kelee.one/GeoLite2-ASN-P3TERX.mmdb
+skip-proxy = 192.168.0.0/16,10.0.0.0/8,172.16.0.0/12,localhost,*.local,e.crashlynatics.com
+bypass-tun = 10.0.0.0/8,100.64.0.0/10,127.0.0.0/8,169.254.0.0/16,172.16.0.0/12,192.0.0.0/24,192.0.2.0/24,192.88.99.0/24,192.168.0.0/16,198.51.100.0/24,203.0.113.0/24,224.0.0.0/4,255.255.255.255/32
+
+[Proxy]
+
+[Remote Proxy]
+CW = https://162.19.79.201/s/***REDACTED***?flag=loon,udp=default,block-quic=default,fast-open=default,vmess-aead=default,skip-cert-verify=true,enabled=false,flexible-sni=false
+Sub = https://47.112.97.173:5000/api/v1/client/subscribe?token=YOUR_TOKEN_HERE,udp=true,block-quic=true,fast-open=default,vmess-aead=default,skip-cert-verify=true,enabled=true,flexible-sni=false
+
+[Remote Filter]
+全球节点 = NameRegex, FilterKey = "^(?=.*(.))(?!.*((?i)群|邀请|返利|循环|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|过滤|防止|国内|地址|频道|无法|说明|使用|提示|特别|访问|支持|教程|关注|更新|作者|加入|超时|收藏|福利|邀请|好友|失联|(\b(USE|USED|TOTAL|EXPIRE|EMAIL|Panel|Channel|Author|Traffic)(\d+)?\b|(\d{4}-\d{2}-\d{2}|\dG)))).*$"
+
+[Proxy Group]
+全球时延优选 = url-test,全球节点,interval = 300,tolerance = 50,img-url = https://raw.githubusercontent.com/Orz-3/mini/master/Color/Global.png
+
+[Rule]
+# 当配置文件中没有任何有效策略组时，Loon将使用内置的PROXY策略组
+# 当配置文件中存在有效的策略组时，内置的PROXY策略组将不再允许被调用，仅可使用用户配置的策略组
+# 本地 GEOIP,CN,DIRECT 兜底（2026-10-06 新增）：本地规则优先于远程规则求值，
+# 即使远程 CN REGION 规则拉取/更新失败，国内 IP 也能直连，不会漏到 FINAL
+# 请勿修改远程CN REGION规则的排序甚至删除
+# 断阿里 amdc HTTPDNS 裸IP调度（2026-10-08 淘宝 feed 隐身根因）：App 借 amdc 拿 IP 直连绕过域名层/MITM，
+# 插件内同款 URL-REGEX 会被下方本地 GEOIP,CN 抢跑（本地规则>插件规则），故必须放本地且在 GEOIP 之前
+URL-REGEX, ^http:\/\/[\d.]+(:80)?\/amdc\/mobileDispatch, REJECT
+GEOIP,CN,DIRECT
+FINAL,全球时延优选
+
+[Remote Rule]
+# 2026-10-06 服务规则切换为 blackmatrix7 开源库（kelee 的上游数据源，同源更透明）
+# 首次拉取需代理可用（Loon 自身隧道即可）；断代理环境下更新可加 https://ghproxy.net/ 前缀
+# 广告/挖矿/钓鱼/统计域名 REJECT（SukkaW 精选 368 条，规则级拦截，与 kelee 去广告插件互补）
+# 放在远程规则首位：广告域名优先于其他域名规则命中
+https://raw.githubusercontent.com/SukkaW/Surge/master/Source/non_ip/reject.conf, policy=REJECT, tag=Reject, enabled=true
+https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Telegram/Telegram.list, policy=全球时延优选, tag=Telegram, enabled=true
+https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/TikTok/TikTok.list, policy=全球时延优选, tag=TikTok, enabled=true
+# AI 聚合（SukkaW）：OpenAI/Claude/Gemini/Perplexity/Apple Intelligence 一条覆盖，取代原 4 条 bm7 细分规则
+https://raw.githubusercontent.com/SukkaW/Surge/master/Source/non_ip/ai.conf, policy=全球时延优选, tag=AI, enabled=true
+https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Speedtest/Speedtest.list, policy=全球时延优选, tag=Speedtest, enabled=true
+# Apple 全系直连（国区 ID，2026-10-06）：SukkaW 精选规则（日更），
+# push.apple.com/iCloud/App Store/系统更新全部直连，快且省节点流量
+# 偶尔切外区 ID 下载慢时：临时关闭 Apple 这条 tag，流量自动回落到 FINAL 走代理
+https://raw.githubusercontent.com/SukkaW/Surge/master/Source/non_ip/apple_services.conf, policy=DIRECT, tag=Apple, enabled=true
+https://raw.githubusercontent.com/SukkaW/Surge/master/Source/non_ip/apple_cn.conf, policy=DIRECT, tag=AppleCN, enabled=true
+https://raw.githubusercontent.com/SukkaW/Surge/master/Source/ip/apple_services.conf, policy=DIRECT, tag=AppleIP, enabled=true
+# ChinaMax 域名库（blackmatrix7，日更）：国内域名免解析直接命中 DIRECT，
+# 不依赖 kelee 可达性；域名类规则优先于 IP 类，放这里不影响前面的域名规则
+https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/ChinaMax/ChinaMax.list, policy=DIRECT, tag=ChinaMax, enabled=true
+https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Lan/Lan.list, policy=DIRECT, tag=LAN, enabled=true
+https://kelee.one/Tool/Loon/Lsr/REGION_SPLITTER.lsr, policy=DIRECT, tag=CN REGION, enabled=true
+
+[Host]
+
+[Rewrite]
+
+[Script]
+
+[Plugin]
+https://raw.githubusercontent.com/songsongisme/Loon-config/main/Plugins/Zhibo8_remove_ads.lpx, tag=直播吧, enabled=true
+https://raw.githubusercontent.com/songsongisme/Loon-config/main/Plugins/JD_remove_ads.lpx, tag=京东, enabled=true
+https://kelee.one/Tool/Loon/Lpx/ZhuanZhuan_remove_ads.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/LOL_Bible_remove_ads.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/iMaiCai_remove_ads.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/RedPaper_remove_ads.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/XiaoHeiHe_remove_ads.lpx, enabled=true
+https://raw.githubusercontent.com/songsongisme/Loon-config/main/Plugins/FleaMarket_remove_ads.lpx, tag=闲鱼, enabled=true
+https://kelee.one/Tool/Loon/Lpx/XiaChuFang_remove_ads.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/WexinMiniPrograms_Remove_ads.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/Weixin_Official_Accounts_remove_ads.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/NeteaseCloudMusic_remove_ads.lpx, enabled=true
+https://raw.githubusercontent.com/songsongisme/Loon-config/main/Plugins/Taobao_remove_ads.lpx, tag=淘宝增强, enabled=true
+https://kelee.one/Tool/Loon/Lpx/smzdm_remove_ads.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/PuPuMall_remove_ads.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/PinDuoDuo_remove_ads.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/MaiMai_remove_ads.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/QuarkBrowser_remove_ads.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/MrHema_remove_ads.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/Umetrip_remove_ads.lpx, enabled=true
+https://raw.githubusercontent.com/songsongisme/Loon-config/main/Plugins/Amap_remove_ads.lpx, tag=高德, enabled=true
+https://kelee.one/Tool/Loon/Lpx/DiDi_remove_ads.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/Dewu_remove_ads.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/Damai_remove_ads.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/Reddit_remove_ads.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/QQMusic_remove_ads.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/12306_remove_ads.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/Block_HTTPDNS.lpx, pin=true, enabled=true
+https://kelee.one/Tool/Loon/Lpx/BlockAdvertisers.lpx, pin=true, enabled=true
+https://kelee.one/Tool/Loon/Lpx/QuickSearch.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/Prevent_DNS_Leaks.lpx, policy=全球时延优选, enabled=true
+https://kelee.one/Tool/Loon/Lpx/Node_detection_tool.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/TestFlightRegionUnlock.lpx, policy=DIRECT, enabled=false
+https://kelee.one/Tool/Loon/Lpx/BoxJs.lpx, policy=全球时延优选, enabled=true
+https://kelee.one/Tool/Loon/Lpx/Sub-Store.lpx, policy=全球时延优选, enabled=true
+https://kelee.one/Tool/Loon/Lpx/Script-Hub.lpx, policy=全球时延优选, enabled=true
+
+[Mitm]
+ca-p12 = YOUR_CA_P12_HERE
+ca-passphrase = ***REDACTED***
+hostname =
+skip-server-cert-verify = false
