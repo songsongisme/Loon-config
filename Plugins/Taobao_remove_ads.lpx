@@ -18,6 +18,7 @@ DOMAIN, loggw-ex.alipay.com, REJECT
 DOMAIN, dualstack-logs.amap.com, REJECT
 DOMAIN-SUFFIX, logs.amap.com, REJECT
 DOMAIN-SUFFIX, tanx.com, REJECT
+AND, ((DOMAIN-SUFFIX, m.taobao.com), (PROTOCOL, QUIC)), REJECT
 
 [Rewrite]
 request if ${url} ~= /^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.fliggy\.crm\.screen\.(allresource|predict)/i then reject_dict(200)
