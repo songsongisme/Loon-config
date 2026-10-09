@@ -54,9 +54,6 @@ bypass-tun = 10.0.0.0/8,100.64.0.0/10,127.0.0.0/8,169.254.0.0/16,172.16.0.0/12,1
 # 本地 GEOIP,CN,DIRECT 兜底（2026-10-06 新增）：本地规则优先于远程规则求值，
 # 即使远程 CN REGION 规则拉取/更新失败，国内 IP 也能直连，不会漏到 FINAL
 # 请勿修改远程CN REGION规则的排序甚至删除
-# 断阿里 amdc HTTPDNS 裸IP调度（2026-10-08 淘宝 feed 隐身根因）：App 借 amdc 拿 IP 直连绕过域名层/MITM，
-# 插件内同款 URL-REGEX 会被下方本地 GEOIP,CN 抢跑（本地规则>插件规则），故必须放本地且在 GEOIP 之前
-URL-REGEX, ^http:\/\/[\d.]+(:80)?\/amdc\/mobileDispatch, REJECT
 GEOIP,CN,DIRECT
 FINAL,全球时延优选
 
@@ -88,6 +85,11 @@ https://kelee.one/Tool/Loon/Lsr/REGION_SPLITTER.lsr, policy=DIRECT, tag=CN REGIO
 [Rewrite]
 
 [Script]
+# amdc HTTPDNS 静默回落（2026-10-08 淘宝 feed 隐身根因）：App 借 amdc 拿裸 IP 直连绕过域名层/MITM。
+# 原 [Rule] URL-REGEX REJECT 断连会引发重试风暴（淘宝插件 v8 教训），且会抢在插件静默回落脚本之前杀掉请求；
+# 改为脚本篡改调度响应体（同插件 v9+ 手法）：App 拿 200 但解析失败即静默回落系统 DNS，域名/裸 IP 形态通吃。
+# 脚本按 UA 白名单过滤，非阿里系放行；GEOIP,CN 仅决定路由不影响脚本触发，无需再占 [Rule] 位。
+http-response ^http:\/\/[^\/]+(:\d+)?\/amdc\/mobileDispatch script-path=https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/amdc_fallback.js, requires-body = true, tag = amdc静默回落
 
 [Plugin]
 https://raw.githubusercontent.com/songsongisme/Loon-config/main/Plugins/Zhibo8_remove_ads.lpx, enabled=true
