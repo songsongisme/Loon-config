@@ -5,7 +5,7 @@
 | 文件 | 说明 |
 |---|---|
 | `Scripts/JD_remove_ads.js` | 京东去广告增强版脚本，fork 自 kelee/RuCu6（出处见文件头），增补：welcomeHome 移除全部 type=hybrid 运营楼层（官方直降 banner、国家补贴、品质生活、9.9包邮、直播、延迟弹窗、高潜省钱卡）；v3 增补 start 接口投放观测日志（漏网归因：投放时打印顶层字段+首条素材域名） |
-| `Plugins/JD_remove_ads.lpx` | 京东插件（v3，配合上述脚本），[Script] 指向本仓库 raw；v3 新增 api.m.jd.com QUIC 防御（直连 QUIC 逃逸 MITM） |
+| `Plugins/JD_remove_ads.lpx` | 京东插件（v4，配合上述脚本），[Script] 指向本仓库 raw；v3 QUIC 防御；v4 开屏素材层拦截（投放指令已移出可见 HTTP，拦 mobilecms 全屏图，实测无 start 调用归因详见 git log） |
 | `Plugins/Zhibo8_remove_ads.lpx` | 直播吧去广告增强版，fork 自 kelee，增补 4 条拦截 |
 | `Plugins/Taobao_remove_ads.lpx` | 淘宝去广告增强版（v10.1），fork 自 kelee 多轮 HAR 实证迭代：poplayer 弹层全域拦截、mmstat/tanx 埋点域族、QUIC 降级、吃饭券/外卖预取拦截；v9 起 amdc 由 REJECT 断连改为响应体篡改静默回落系统 DNS；v10 IP 层打断直连试验已证伪回退（IP 池轮换打地鼠、无 SNI 私有通道不可 MITM，详见 v10.1 desc 与 git log） |
 | `Plugins/FleaMarket_remove_ads.lpx` | 闲鱼去广告增强版，fork 自 kelee 2026-10-02 完整 23 条复写，对照 ddgksf2013 GoofishAds 去重后增补：mtop.idle.ad.expose 开屏变体、iyes.youku.com 广告域、amdc 静默回落 |

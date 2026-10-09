@@ -1,5 +1,5 @@
-#!name = 京东去广告 增强版 v3
-#!desc = 移除京东开屏广告，精简首页/我的页面产品推广与埋点上报。kelee 原版（2026-10-02）完整 fork，本地增补：welcomeHome 移除全部 type=hybrid 运营楼层（实测 7 个全为推广物料，整类过滤抗大促轮换）；v2 新增埋点/性能域族 REJECT（mars 实测单次冷启动 15s 50+ 条，另有 mllog/uranus/cltm/ex/anti-sdk-report/perf/policy/cactus/h5speed）、/da/ 广告素材路径、queryPagePopWindow/babelGetGuideTips 首页 H5 弹窗与引导接口拦截（ProxyPin 实测响应 activityId 与首页内嵌 Babel 活动页一致）。上游更新时 diff 本插件与 kelee_originals/JD_remove_ads.lpx。脚本以 GitHub raw 分发（本仓库 Scripts/JD_remove_ads.js）。uniformRecommend9 为首页推荐主 feed，有意不拦截（kelee 的 uniformRecommend[06] 规则勿扩大到 9）；v3 增补：api.m.jd.com QUIC 防御（直连 QUIC 逃逸 MITM，漏网开屏候选成因）+ start 接口投放观测日志（仅投放发生时打印顶层字段与首条素材，平时静默，供漏网归因）。注意：[Rewrite]/[Script] 段内行尾不能带分号、不能有 # 注释，否则整段不识别。
+#!name = 京东去广告 增强版 v4
+#!desc = 移除京东开屏广告，精简首页/我的页面产品推广与埋点上报。kelee 原版（2026-10-02）完整 fork，本地增补：welcomeHome 移除全部 type=hybrid 运营楼层（实测 7 个全为推广物料，整类过滤抗大促轮换）；v2 新增埋点/性能域族 REJECT（mars 实测单次冷启动 15s 50+ 条，另有 mllog/uranus/cltm/ex/anti-sdk-report/perf/policy/cactus/h5speed）、/da/ 广告素材路径、queryPagePopWindow/babelGetGuideTips 首页 H5 弹窗与引导接口拦截（ProxyPin 实测响应 activityId 与首页内嵌 Babel 活动页一致）。上游更新时 diff 本插件与 kelee_originals/JD_remove_ads.lpx。脚本以 GitHub raw 分发（本仓库 Scripts/JD_remove_ads.js）。uniformRecommend9 为首页推荐主 feed，有意不拦截（kelee 的 uniformRecommend[06] 规则勿扩大到 9）；v3 增补：api.m.jd.com QUIC 防御（直连 QUIC 逃逸 MITM，漏网开屏候选成因）+ start 接口投放观测日志（仅投放发生时打印顶层字段与首条素材，平时静默，供漏网归因）；v4 素材层拦截：实测 16.0.70 清缓存冷启无 start 调用、素材 URL 不在任何 MITM 响应体——投放指令已移出可见 HTTP 通道（载体为 jpushsc:2002 长连接或本地缓存计划），新增 mobilecms 全屏尺寸（s1xxx×xxxx）运营图 REJECT，无素材则开屏不展示，feed 小图（s240x240 等）不受影响。注意：[Rewrite]/[Script] 段内行尾不能带分号、不能有 # 注释，否则整段不识别。
 #!author = RuCu6/Maasea（原版规则） / 本地 fork 增补
 #!icon = https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/JD.png
 #!date = 2026-10-09
@@ -8,6 +8,7 @@
 [Rule]
 URL-REGEX, "^http:\/\/\w{32}\.jddebug\.com\/diagnose\?", REJECT
 URL-REGEX, "^https?:\/\/img\d+\.360buyimg\.com\/da\/", REJECT
+URL-REGEX, "^https?:\/\/m\d*\.360buyimg\.com\/mobilecms\/s1\d{3}x\d{4}_jfs\/", REJECT
 DOMAIN-SUFFIX, mars.jd.com, REJECT
 DOMAIN, mllog.jd.com, REJECT
 DOMAIN, uranus.jd.com, REJECT
