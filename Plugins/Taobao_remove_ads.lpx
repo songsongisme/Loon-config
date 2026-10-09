@@ -1,5 +1,5 @@
-#!name = 淘宝去广告 增强版 v10
-#!desc = fork 自 kelee 2026-10-02 版，多轮冷启动 HAR 实证迭代。拦截开屏广告、首页弹窗/浮层/运营 banner 与埋点域族（mmstat/tanx/amap 等）；修复原版 poplayer 弹层配置正则失配。v10 试验：IP 层打断 amdc 存量直连——59.82.9.249/114.112.210.4 两台 mtop 网关 IP（whois：阿里骨干+IDC 边缘节点）REJECT（112.95.9.101 联通广东段存疑，或为自家节点入口，暂不拦），逼 ANet 回落域名通道，验证详情页/首页 feed 能否进入 MITM 视野；IP 池有时效性，失效即删。保留 v9 amdc 响应体静默回落（脚本按 UA 白名单过滤）与 kelee 11 条 mtop 拦截、guide-acs 开屏脚本。若设备端出现详情/feed 加载异常，回退 v9。更新插件后请核对 name 中的版本号。
+#!name = 淘宝去广告 增强版 v10.1
+#!desc = fork 自 kelee 2026-10-02 版，多轮冷启动 HAR 实证迭代。拦截开屏广告、首页弹窗/浮层/运营 banner 与埋点域族（mmstat/tanx/amap 等）；修复原版 poplayer 弹层配置正则失配。v10 试验结论（2026-10-09 实机证伪）：IP 层打断 amdc 存量直连不可行——拦 210.4 换 215.15、拦 9.249 换 33.214（IP 池轮换打地鼠），且直连呈上行 434KB/下行 236B 重试形态白烧流量；核心 feed/detail 走无 SNI 的 ANet 私有多路复用通道（sni-sniffing 开启仍显示裸 IP），MITM 无从挂载，已回退全部 IP 规则，维持 v9 能力（amdc 域名/裸 IP 调度静默回落 + 域名通道广告拦截）。更新插件后请核对 name 中的版本号。
 #!author = RuCu6/可莉（原版规则） / 个人增强 fork
 #!icon = https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/Taobao.png
 #!date = 2026-10-08
@@ -24,8 +24,6 @@ DOMAIN, app-monitor.ele.me, REJECT
 DOMAIN, alsc-fingerprint.ele.me, REJECT
 DOMAIN-SUFFIX, cloudvideocdn.taobao.com, REJECT
 AND, ((DOMAIN-SUFFIX, m.taobao.com), (PROTOCOL, QUIC)), REJECT
-IP-CIDR, 59.82.9.249/32, REJECT, no-resolve
-IP-CIDR, 114.112.210.4/32, REJECT, no-resolve
 
 [Rewrite]
 request if ${url} ~= /^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.fliggy\.crm\.screen\.(allresource|predict)/i then reject_dict(200)
