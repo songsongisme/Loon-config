@@ -168,7 +168,15 @@ if (url.includes("functionId=deliverLayer") || url.includes("functionId=orderTra
   }
 } else if (url.includes("functionId=start")) {
   // 开屏广告
+  // 本地增补（漏网归因观测）：投放发生时才打印——顶层字段结构 + 首条素材 URL。
+  // 平时无投放则静默；若设备端仍见开屏而此处无日志，说明漏网不走 start 接口（查 QUIC/缓存/新接口）。
   if (obj?.images?.length > 0) {
+    try {
+      console.log(`[JD开屏观测] 投放${obj.images.length}条 顶层字段: ${Object.keys(obj).join(",")}`);
+      const first = obj.images[0];
+      const img = first?.img || first?.url || first?.image || first?.pic;
+      if (img) console.log(`[JD开屏观测] 首条素材: ${String(img).slice(0, 200)}`);
+    } catch (e) {}
     obj.images = [];
   }
   if (obj?.showTimesDaily) {
