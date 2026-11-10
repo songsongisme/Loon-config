@@ -1,6 +1,6 @@
 # Loon-config
 
-个人 Loon 自维护插件与脚本（远端分发）。
+个人 Loon 自维护插件、Surge 模块与脚本（远端分发）。
 
 | 文件 | 说明 |
 |---|---|
@@ -13,5 +13,8 @@
 | `Plugins/Amap_remove_ads.lpx` | 高德去广告增强版，fork 自 kelee 完整规则，脚本自托管摆脱 kelee.one 依赖；对照 ddgksf2013 AmapAds 增补开屏请求变体/广告归因/msgbox 变体/GIF 素材/amdc 静默回落，另按抓包拦 awaken 小组件埋点 |
 | `Scripts/Amap_remove_ads.js` | 高德脚本（fork 自 RuCu6 2026-03-09 存档，功能与原版一致），配套上述插件 |
 | `main.lcf` | 脱敏主配置（订阅 token 与 CA 私钥以占位符替换，导入时保留本机订阅/证书）；2026-10-08 amdc 处理移入 [Script] 静默回落（同 amdc_fallback.js，域名/裸 IP 通吃） |
+| `Surge/Modules/Xiaohongshu.sgmodule` | Surge 小红书去广告与信息流净化模块，远程脚本固定 commit |
+| `Surge/Modules/XianYu.sgmodule` | Surge 闲鱼去广告模块，远程脚本固定 commit |
+| `Surge/Modules/Zhibo8.sgmodule` | 从 Loon 直播吧插件移植的 Surge 原生模块，不依赖外部脚本 |
 
 真实主配置（含 CA 私钥与订阅 token）不入库，仅同步脱敏版 main.lcf。

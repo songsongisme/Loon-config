@@ -1,0 +1,43 @@
+#!name=直播吧去广告（移植版 2026-11-10）
+#!desc=移植自 Loon 本地增强版 v1（2026-10-07）。移除信息流广告、横幅、弹窗、皮肤配置、悬浮挂件和热门搜索，精简我的页面并移除青少年模式。10 条请求拦截改为 Map Local 返回 {} + 200，8 条响应改写合并为 JQ Body Rewrite，不需要外部脚本。
+#!author=@可莉（原版规则） / 个人克隆增补 / Surge 移植
+#!icon=https://raw.githubusercontent.com/Orz-3/mini/master/Color/Global.png
+#!date=2026-11-10
+
+[Map Local]
+# 新闻关系与猜测页弹窗、公告、横幅
+^https:\/\/rn\.qiumibao\.com\/news\/relation\.php$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/guess\.qiumibao\.com\/api\/c\/notice$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/guess\.qiumibao\.com\/api\/c\/pop$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/guess\.qiumibao\.com\/api\/ep\/pop$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/guess\.qiumibao\.com\/api\/c\/banner$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+
+# 热门搜索、埋点、广告曝光、活动素材与活动配置
+^https:\/\/search\.qiumibao\.com\/hot\/word_list$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/tongji\.qiumibao\.com\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/impress\.qiumibao\.com\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/s\.qiumibao\.com\/activities\/material\/json\.htm\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/a\.qiumibao\.com\/activities\/config\.php data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+
+[Body Rewrite]
+# 推荐流只保留纯资讯，过滤视频资讯和其他非 news 内容
+http-response-jq ^https:\/\/headline\.qiumibao\.com\/recommend\/list\? '.news |= map(select(.model == "news"))'
+
+# 发现页过滤游戏推广
+http-response-jq ^https:\/\/a\.qiumibao\.com\/found\/\? 'map(select(.is_game != true))'
+
+# 主配置摘除广告、商城、奖励、皮肤等开关，并移除“游戏”分区标签
+http-response-jq ^https:\/\/a\.qiumibao\.com\/ios\/config\/\? 'del(.skin, .advert, .advert_config, .mall, .httpdns, .reward, .pgame, .corner_mark, .liveshop, .theme, .pop, .live_activity_push) | (.all_sections.match_sections.labels |= (if . then (.blacks_disable |= if . then map(select(. != "游戏")) else . end) | (.show |= if . then map(select(. != "游戏")) else . end) else . end))'
+
+# 推荐列表与菜单横幅
+http-response-jq ^https:\/\/guess\.qiumibao\.com\/api\/n\/rcd$ 'del(.data.banner)'
+http-response-jq ^https:\/\/guess\.qiumibao\.com\/api\/c\/menu$ 'del(.data.banner)'
+
+# 赛前数据分析页过滤引导内容
+http-response-jq ^https:\/\/pre-match\.qiumibao\.com\/pre_match_data\/v\d\/\d+-\d+-\d+\/\d+_fund\.htm\? 'del(.data[] | select(.type == "guide"))'
+
+# 比赛详情页移除扩展广告字段
+http-response-jq ^https:\/\/s\.qiumibao\.com\/m\/ios\/json\/zhibo\/zuqiu\/\d+\/match\d+vl\.htm\? 'del(.ep_v2, .ep_live)'
+
+[MITM]
+hostname = %APPEND% headline.qiumibao.com, a.qiumibao.com, rn.qiumibao.com, guess.qiumibao.com, s.qiumibao.com, pre-match.qiumibao.com, search.qiumibao.com, tongji.qiumibao.com, impress.qiumibao.com

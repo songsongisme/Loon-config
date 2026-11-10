@@ -5,5 +5,7 @@ photo_*
 proxy_tmp/
 kelee_originals/
 *token*
+Surge.conf
+Surge/*.local.conf
 
 !main.lcf
