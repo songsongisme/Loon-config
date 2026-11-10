@@ -1,0 +1,55 @@
+#!name=高德去广告（Loon 移植 2026-11-10）
+#!desc=移植自 Loon 高德增强版 v1。4 条域名规则、17 条请求/素材拦截、3 条 JSON 响应改写和 15 条响应脚本；脚本继续使用本仓库自托管 Amap_remove_ads.js 与共享 amdc_fallback.js。
+#!author=RuCu6/kelv1n1n/可莉（原版规则）/ Surge 移植
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/Amap.png
+#!date=2026-11-10
+
+[Rule]
+DOMAIN,amap-aos-info-nogw.amap.com,REJECT
+DOMAIN,free-aos-cdn-image.amap.com,REJECT
+DOMAIN-SUFFIX,v.smtcdns.com,REJECT
+DOMAIN,awaken.amap.com,REJECT
+
+[Map Local]
+^https:\/\/m5\.amap\.com\/ws\/shield\/search\/new_hotword\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/m5\.amap\.com\/ws\/faas\/amap-navigation\/card-service-(?:car-end|route-plan) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/m5\.amap\.com\/ws\/shield\/search_poi\/tips_adv\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/oss\.amap\.com\/ws\/banner\/lists\/\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/ai\.amap\.com\/v1\/ai_rec\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/m5\.amap\.com\/ws\/aos\/main\/page\/product\/list\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/m5\.amap\.com\/ws\/faas\/amap-navigation\/(?:main-page-assets|main-page-location|ridewalk-end-fc|usr-profile-fc\/homeV2) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/m5\.amap\.com\/ws\/(?:mapapi\/hint_text\/offline_data|message\/notice\/list|shield\/search\/new_hotword) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/m5\.amap\.com\/ws\/shield\/scene\/recommend\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/m5\.amap\.com\/ws\/valueadded\/weather\/v2\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/sns\.amap\.com\/ws\/msgbox\/pull_mp\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/m5-zb\.amap\.com\/ws\/boss\/(?:order\/car\/(?:feedback\/get_card_questions|feedback\/viptips|king_toolbox_car_bubble|remark\/satisfactionConf|rights_information)|tips\/onscene_visual_optimization) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/m5-zb\.amap\.com\/ws\/boss\/(?:pay\/web\/paySuccess\/info\/request|transportation\/diversion\/resource\/driving) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/[\w-]+\.amap\.com\/ws\/aos\/alimama\/splash_screen data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/[\w-]+\.amap\.com\/ws\/asa\/ads_attribution data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/[\w-]+\.amap\.com\/ws\/msgbox\/pull\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/[\w-]+\.amap\.com\/uploadimg\/\w+\.gif data-type=tiny-gif status-code=200
+
+[Body Rewrite]
+http-response-jq ^https:\/\/m5\.amap\.com\/ws\/shield\/search_business\/process\/marketingOperationStructured\? 'del(.data.commonMaterial, .data.tipsOperationLocation, .data.resourcePlacement)'
+http-response-jq ^https:\/\/m5\.amap\.com\/ws\/shield\/search_poi\/homepage\? 'del(.history_tags)'
+http-response-jq ^https:\/\/m5-zb\.amap\.com\/ws\/sharedtrip\/taxi\/order_detail_car_tips\? 'del(.data.carTips.data.popupInfo)'
+
+[Script]
+amap_route_1 = type=http-response, pattern=^https:\/\/m5\.amap\.com\/ws\/aos\/perception\/publicTravel\/beforeNavi\?, script-path=https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads.js, requires-body=true, max-size=0
+amap_route_2 = type=http-response, pattern=^https:\/\/m5\.amap\.com\/ws\/bus\/plan\/integrate\?, script-path=https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads.js, requires-body=true, max-size=0
+amap_hotel = type=http-response, pattern=^https:\/\/m5\.amap\.com\/ws\/c3frontend\/(?:af-(?:hotel|launch)\/page\/main|af-nearby\/nearby), script-path=https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads.js, requires-body=true, max-size=0
+amap_drive = type=http-response, pattern=^https:\/\/m5\.amap\.com\/ws\/perception\/drive\/(?:routeInfo|routePlan), script-path=https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads.js, requires-body=true, max-size=0
+amap_search_hotword = type=http-response, pattern=^https:\/\/m5\.amap\.com\/ws\/shield\/search_bff\/hotword\?, script-path=https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads.js, requires-body=true, max-size=0
+amap_search_detail = type=http-response, pattern=^https:\/\/m5\.amap\.com\/ws\/shield\/search_poi\/(?:mps|search\/sp|sug|tips_operation_location), script-path=https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads.js, requires-body=true, max-size=0
+amap_home = type=http-response, pattern=^https:\/\/m5\.amap\.com\/ws\/faas\/amap-navigation\/(?:card-service-plan-home|main-page), script-path=https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads.js, requires-body=true, max-size=0
+amap_home_config = type=http-response, pattern=^https:\/\/m5\.amap\.com\/ws\/shield\/frogserver\/aocs\/updatable\/1\?, script-path=https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads.js, requires-body=true, max-size=0
+amap_mine = type=http-response, pattern=^https:\/\/m5\.amap\.com\/ws\/shield\/dsp\/profile\/index\/nodefaasv3\?, script-path=https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads.js, requires-body=true, max-size=0
+amap_nearby = type=http-response, pattern=^https:\/\/m5\.amap\.com\/ws\/shield\/search\/nearbyrec_smart\?, script-path=https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads.js, requires-body=true, max-size=0
+amap_splash = type=http-response, pattern=^https:\/\/m5\.amap\.com\/ws\/valueadded\/alimama\/splash_screen\?, script-path=https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads.js, requires-body=true, max-size=0
+amap_taxi = type=http-response, pattern=^https:\/\/m5-zb\.amap\.com\/ws\/boss\/(?:car\/order\/content_info|order_web\/friendly_information), script-path=https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads.js, requires-body=true, max-size=0
+amap_promotion = type=http-response, pattern=^https:\/\/m5-zb\.amap\.com\/ws\/promotion-web\/resource(\/home)?\?, script-path=https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads.js, requires-body=true, max-size=0
+amap_poi = type=http-response, pattern=^https:\/\/(?:info|m5)\.amap\.com\/ws\/shield\/search\/(?:common\/coupon\/info|poi\/detail), script-path=https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/Amap_remove_ads.js, requires-body=true, max-size=0
+amap_amdc = type=http-response, pattern=^http:\/\/[^\/]+(:\d+)?\/amdc\/mobileDispatch, script-path=https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/amdc_fallback.js, requires-body=true
+
+[MITM]
+hostname = %APPEND% *.amap.com

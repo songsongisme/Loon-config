@@ -1,0 +1,34 @@
+#!name=京东去广告（Loon 移植 2026-11-10）
+#!desc=移植自 Loon 京东增强版 v4。保留 QUIC 防御、埋点域族和素材拦截；响应脚本继续使用本仓库 JD_remove_ads.js。
+#!author=RuCu6/Maasea（原版规则） / 本地 fork / Surge 移植
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/JD.png
+#!date=2026-11-10
+
+[Rule]
+URL-REGEX,^http:\/\/\w{32}\.jddebug\.com\/diagnose\?,REJECT
+URL-REGEX,^https?:\/\/img\d+\.360buyimg\.com\/da\/,REJECT
+URL-REGEX,^https?:\/\/m\d*\.360buyimg\.com\/mobilecms\/s1\d{3}x\d{4}_jfs\/,REJECT
+DOMAIN-SUFFIX,mars.jd.com,REJECT
+DOMAIN,mllog.jd.com,REJECT
+DOMAIN,uranus.jd.com,REJECT
+DOMAIN,cltm.jd.com,REJECT
+DOMAIN,ex.m.jd.com,REJECT
+DOMAIN,anti-sdk-report.m.jd.com,REJECT
+DOMAIN,perf.m.jd.com,REJECT
+DOMAIN,policy.jd.com,REJECT
+DOMAIN,cactus.jd.com,REJECT
+DOMAIN,h5speed.m.jd.com,REJECT
+AND,((DOMAIN-SUFFIX,m.jd.com),(PROTOCOL,QUIC)),REJECT
+
+[Map Local]
+^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=(searchBoxWord|stationPullService|uniformRecommend[06]) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=(queryPagePopWindow|babelGetGuideTips) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+
+[Body Rewrite]
+http-response-jq ^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=basicConfig '.data.JDMessage.socketmonitor.isSocketEstablishedAhead = 0 | .data.JDMessage.socketmonitor.isSocketReport = 0 | .data.JDHttpToolKit.httpdns.httpdns = 0'
+
+[Script]
+jd_ads = type=http-response, pattern=^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=(deliverLayer|getTabHomeInfo|myOrderInfo|orderTrackBusiness|personinfoBusiness|start|welcomeHome), script-path=https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/JD_remove_ads.js, requires-body=true, max-size=0
+
+[MITM]
+hostname = %APPEND% api.m.jd.com

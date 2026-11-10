@@ -1,0 +1,50 @@
+#!name=淘宝去广告（Loon 移植 2026-11-10）
+#!desc=移植自 Loon 淘宝增强版 v10.1。保留域名/QUIC/埋点拦截、16 条请求拦截、amdc 静默回落和开屏响应脚本；核心无 SNI ANet 通道限制与 Loon 相同。
+#!author=RuCu6/可莉（原版规则）/ 个人增强 fork / Surge 移植
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/Taobao.png
+#!date=2026-11-10
+
+[Rule]
+DOMAIN,adashx.m.taobao.com,REJECT
+DOMAIN,ossgw.alicdn.com,REJECT
+DOMAIN,ems.youku.com,REJECT
+DOMAIN,hudong.alicdn.com,REJECT
+DOMAIN,h-adashx.ut.taobao.com,REJECT
+DOMAIN,ut.taobao.com,REJECT
+DOMAIN,cdn.ynuf.aliapp.org,REJECT
+DOMAIN,tiga-release-dc.m.taobao.com,REJECT
+DOMAIN,loggw-ex.alipay.com,REJECT
+DOMAIN,dualstack-logs.amap.com,REJECT
+DOMAIN-SUFFIX,logs.amap.com,REJECT
+DOMAIN-SUFFIX,tanx.com,REJECT
+DOMAIN-SUFFIX,mmstat.com,REJECT
+DOMAIN,mdap.alipay.com,REJECT
+DOMAIN,app-monitor.ele.me,REJECT
+DOMAIN,alsc-fingerprint.ele.me,REJECT
+DOMAIN-SUFFIX,cloudvideocdn.taobao.com,REJECT
+AND,((DOMAIN-SUFFIX,m.taobao.com),(PROTOCOL,QUIC)),REJECT
+
+[Map Local]
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.fliggy\.crm\.screen\.(allresource|predict) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.alibaba\.advertisementservice\.getadv data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.alimama\.etao\.config\.query\/.+?etao_advertise data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.alimusic\.common\.mobileservice\.startinit data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.etao\.noah\.query\/.+tao_splash data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.mtopadvertiseapi\.queryadvertise data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.o2o\.ad\.gateway\.get data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.taobao\.idle\.home\.welcome data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.trip\.activity\.querytmsresources data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/(?:gw|heic)\.alicdn\.com\/imgextra\/i\d\/\d*\/?[\w!]+-\d-(?:octopus|tps)-(?:1080|1125)-\d{4}\.(?:jpg|png)_(?:1\d{3}|9\d{2})x(?:\d|1\d{3}|9\d{2})q[59]0 data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/guide-acs\.m\.taobao\.com\/gw\/mtop\.taobao\.(volvo\.secondfloor\.getconfig|wireless\.home\.newface\.awesome\.get) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/poplayer\.template\.alibaba\.com\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/tb\.ele\.me\/app\/conch-page\/eat-coupon-center\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/tb\.ele\.me\/app\/TBTakeout\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/gw\.alipayobjects\.com\/config\/loggw\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/g\.alicdn\.com\/TBTakeout\/et-home\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+
+[Script]
+taobao_amdc = type=http-response, pattern=^http:\/\/[^\/]+(:\d+)?\/amdc\/mobileDispatch, script-path=https://raw.githubusercontent.com/songsongisme/Loon-config/main/Scripts/amdc_fallback.js, requires-body=true
+taobao_splash = type=http-response, pattern=^https:\/\/guide-acs\.m\.taobao\.com\/gw\/mtop\.taobao\.(cloudvideo\.video\.query|wireless\.home\.splash\.awesome\.get), script-path=https://kelee.one/Resource/JavaScript/Taobao/Taobao_remove_ads.js, requires-body=true, max-size=0
+
+[MITM]
+hostname = %APPEND% acs.m.taobao.com, heic.alicdn.com, gw.alicdn.com, guide-acs.m.taobao.com, poplayer.template.alibaba.com, tb.ele.me, gw.alipayobjects.com, infinite.m.taobao.com

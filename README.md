@@ -14,7 +14,10 @@
 | `Scripts/Amap_remove_ads.js` | 高德脚本（fork 自 RuCu6 2026-03-09 存档，功能与原版一致），配套上述插件 |
 | `main.lcf` | 脱敏主配置（订阅 token 与 CA 私钥以占位符替换，导入时保留本机订阅/证书）；2026-10-08 amdc 处理移入 [Script] 静默回落（同 amdc_fallback.js，域名/裸 IP 通吃） |
 | `Surge/Modules/Xiaohongshu.sgmodule` | Surge 小红书去广告与信息流净化模块，远程脚本固定 commit |
-| `Surge/Modules/XianYu.sgmodule` | Surge 闲鱼去广告模块，远程脚本固定 commit |
+| `Surge/Modules/XianYu.sgmodule` | 从 Loon 闲鱼增强版直接移植的 Surge 模块 |
 | `Surge/Modules/Zhibo8.sgmodule` | 从 Loon 直播吧插件移植的 Surge 原生模块，不依赖外部脚本 |
+| `Surge/Modules/Amap.sgmodule` | 从 Loon 高德增强版移植的 Surge 模块 |
+| `Surge/Modules/JD.sgmodule` | 从 Loon 京东增强版移植的 Surge 模块 |
+| `Surge/Modules/Taobao.sgmodule` | 从 Loon 淘宝增强版移植的 Surge 模块 |
 
 真实主配置（含 CA 私钥与订阅 token）不入库，仅同步脱敏版 main.lcf。
